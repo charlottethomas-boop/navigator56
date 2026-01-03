@@ -1,0 +1,95 @@
+#skeleton code: joystick controls
+import joystick
+import pygame
+from config import deadzone
+import socket
+
+def apply_deadzone(value, threshold):
+    if abs(value) < threshold:
+        return 0
+    return value
+
+#example mapping for reading joystick
+def apply_deadzone(self,value):
+ return 0 if abs(value)< deadzone else value
+def read(self):
+
+ x=self.apply_deadzone(self.joystick.get_axis(0)) #left and right
+ y=self.apply_deadzone(self.joy.get_axis(1)) #forward and backward
+ z=self.apply_deadzone(self.joy.get_axis(3)) #vertical up and down
+ r=self.apply_deadzone(self.joy.get_axis(2)) #rotation
+
+s= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+print("socket created")
+
+host_ip= '' #'10.0.0.87'
+port= ''
+
+s.bind(('',port)) #host ip
+s.listen(1)
+client_socket, client_address= s.accept()
+print("socket connected")
+joystick_count= pygame.joystick.get_count() #connection
+print(joystick_count)
+if joystick_count == 0:
+    print("no joystick connected")
+
+else:
+    joystick = pygame.joystick.Joystick(0)
+    joystick.init()
+    print("joystick connected")
+    print("joystick name: {joystick.get_name()}")
+
+def joystick_to_pwms(value):
+ pwm_value= 1500 + (value * 5)
+ pwm_value= max(1000, min(2000, pwm_value))
+ return int(pwm_value)
+
+
+slow_mode_ratio= 0
+rotation_sensitivity_adj=0.25
+#def update rotation(mouse_delta_x, mouse_delta_y):
+    #rotation_amount_x = mouse_delta_x * rotation_sensitivity_adj
+    #rotation_amount_y = mouse_delta_y * rotation_sensitivity_adj
+deadzone=0.5
+running= True
+while running:
+    for event in pygame.event.get():
+        print("loading...")
+        if event.type ==pygame.QUIT:
+            running= False
+        elif event.type ==pygame.motion:
+            
+            joystick.get_axis= joystick #FILLER; REPLACE JOYSTICK
+
+            x_axis= joystick.get_axis(0) #left and right
+            y_axis= joystick.get_axis(1) #forward and backward
+            z_axis= joystick.get_axis(3) #vertical up and down
+            rot= joystick.get_axis(2) #rotation (yaw)
+            print(f"raw values: x axis: {x_axis}, y axis: {y_axis}, rotation: {rot}, z axis: {z_axis}")
+
+read_joystick_axis= joystick #FILLER; REPLACE JOYSTICK
+
+x_axis= read_joystick_axis("x") #left and right
+y_axis= read_joystick_axis("y") #forward and backward
+z_axis= read_joystick_axis("z") #vertical up and down
+rot=read_joystick_axis("r") #rotation (yaw)
+
+if pygame.joystick.Joystick(0).get_button(): slow_mode_ratio= 0 #stop ADD JOYSTICK
+if pygame.joystick.Joystick(0).get_button(): slow_mode_ratio= 1 #fast
+if pygame.joystick.Joystick(0).get_button(): slow_mode_ratio= 0.5 #slow
+
+x_axis= x_axis*slow_mode_ratio
+y_axis= y_axis*slow_mode_ratio
+rot= rot*slow_mode_ratio
+z_axis= z_axis*slow_mode_ratio
+
+y_axis_scale= int((x_axis)*100)
+x_axis_scale= int((y_axis)*-100)
+rot_scale= int((rot)*-100)
+z_axis_scale= int((z_axis)*-100)
+
+thruster_1= y_axis_scale + rot_scale #FILLER REPLACE AXIS_SCALE ON ALL
+thruster_2= y_axis_scale - rot_scale
+thruster_3= x_axis_scale
+thruster_4= z_axis_scale
