@@ -1,0 +1,41 @@
+import tkinter as tk
+import pygame
+#import test_code26 as joystick
+
+m = tk.Tk()
+#widgets added here, such as camera display, thruster status, etc.
+m.mainloop()
+joystick_count= pygame.joystick.get_count() #connection
+print(joystick_count)
+if joystick_count == 0:
+    from tkinter import *
+    main = Tk()
+    ourMessage = 'no joystick connected'
+    messageVar = Message(main, test=ourMessage)
+    messageVar.config(bg='lightpink', font=('times', 24, 'italic'))
+    messageVar
+    main.mainloop()
+
+else:
+    joystick = pygame.joystick.Joystick(0)
+    joystick.init()
+    print("joystick connected")
+    print("joystick name: {joystick.get_name()}")
+class Joystick:
+    def __init__(self):
+        pygame.init()
+        pygame.joystick.init()
+        self.joystick = pygame.joystick.Joystick(0)
+        self.joystick.init()
+
+    def read(self):
+        pygame.event.pump()
+        return {
+            "forward_backward":  -self.joystick.get_axis(1),
+            "yaw": self.joystick.get_axis(0),
+            "vertical": -self.joystick.get_axis(3),
+            "arm": self.joystick.get_button(0),
+        }
+    def apply_deadzone(value, deadzone= 0.5):
+        return 0 if abs(value) < deadzone else value
+pygame.quit()
